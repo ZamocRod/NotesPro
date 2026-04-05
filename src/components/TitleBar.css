@@ -1,0 +1,17 @@
+/* src/components/TitleBar.css */
+.title-bar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0; 
+
+}
+
+.title-bar-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  width: 100%;
+}

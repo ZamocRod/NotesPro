@@ -1,73 +1,89 @@
-# React + TypeScript + Vite
+# NotesPro 📔
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, high-performance, block-based notebook application. Built as a **cross-platform application** using **Electron**, **React**, and **TypeScript**, it leverages web technologies to ensure accessibility across different systems, featuring a user interface **systematically optimized for Windows 11 aesthetics**.
 
-Currently, two official plugins are available:
+NotesPro provides a seamless editing experience, blending the flexibility of web-based environments with specialized support for premium Windows materials like **Mica**, **Acrylic**, and **Tabbed** surfaces when running on supported versions of Windows 11.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **🚀 Performance-Driven**: Powered by Vite and React for near-instant interaction.
+- **🎨 Windows 11 Native Experience**: 
+  - Supports **Mica**, **Acrylic**, and **Tabbed** background materials.
+  - Custom, integrated title bar with native window control synchronization.
+  - Automatic Dark/Light mode synchronization with Electron's `nativeTheme`.
+- **📝 Block-Based Editor**: Create content using a flexible system of blocks.
+  - Multi-line code editing with **PrismJS** syntax highlighting.
+  - Slash commands for quick content creation.
+- **📂 Hierarchical Organization**: Manage your notes through a nested notebook structure.
+- **💾 Local First**: All data is stored locally in your browser/app using **IndexedDB**, ensuring privacy and speed.
+- **🔄 Tools**: Built-in Import/Export functionality for backups and data persistence.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Frontend**: React 19, TypeScript, Zustand (State Management).
+- **Backend/Runtime**: Electron (Windows Integration).
+- **Styling**: Vanilla CSS with a modular, component-based architecture.
+- **Icons**: Lucide React.
+- **Persistence**: IDB (IndexedDB wrapper).
+- **Build Tool**: Vite.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (Latest LTS recommended).
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/).
+
+### Installation
+
+1. Clone the repository OR download the source code.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Development
+
+To run the application in development mode with HMR (Hot Module Replacement):
+
+```bash
+# Terminal 1: Start the Vite dev server
+npm run dev
+
+# Terminal 2: Start Electron (Wait for Vite to be ready)
+npm run electron:dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Building for Production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+To create a production-ready Windows executable:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run electron:build
 ```
+
+---
+
+## 🎨 Customization
+
+Colors and theme tokens are managed in `src/styles/variables.css`. You can adjust opacities and colors for both Light and Dark themes to customize the transparency of the Mica/Acrylic effects.
+
+---
+
+## 🤖 About Development
+
+This project was built leveraging **Antigravity**, primarily through AI-assisted coding, with manual adjustments, architectural decisions, and oversight provided by a React Developer.
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3 (GPLv3)**. 
+
+NotesPro is free software: you can redistribute it and/or modify it under the terms of the GPLv3 to ensure that the application and its future improvements remain free and open for the entire community. See the [LICENSE](./LICENSE) file for more details.

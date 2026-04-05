@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useBlockStore } from '../store/blockStore';
 import { BlockNode } from './BlockNode';
+import './Editor.css';
 
 interface EditorProps {
     notebookId: string;

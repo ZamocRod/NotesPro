@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useBlockStore } from '../store/blockStore';
 import { useNotebookStore } from '../store/notebookStore';
 import type { BlockType } from '../types';
-import { Link, Type, Heading1, Heading2, Heading3, List as ListIcon, Plus, X } from 'lucide-react';
+import { Link, Type, Heading1, Heading2, Heading3, List as ListIcon, Plus, X, Code } from 'lucide-react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-markup';
+import Editor from 'react-simple-code-editor';
+import './BlockNode.css';
 
 interface BlockProps {
     id: string;
@@ -12,33 +18,53 @@ interface BlockProps {
     index: number;
 }
 
+const detectLanguage = (code: string) => {
+    if (/<\/?[a-z][\s\S]*>/i.test(code)) return 'markup';
+    if (/^[.#a-zA-Z0-9-]+\s*\{[^}]*\}/m.test(code)) return 'css';
+    return 'javascript';
+};
+
 export function BlockNode({ id, type, content, index, notebookId }: BlockProps) {
     const { updateBlockContent, updateBlockType, createBlockAfter, deleteBlock, focusedBlockId, setFocusedBlock, focusPrevious, focusNext, blocks } = useBlockStore();
     const { notebooks, setActiveNotebook, createNotebook } = useNotebookStore();
 
     const editableRef = useRef<HTMLDivElement>(null);
+    const codeContainerRef = useRef<HTMLDivElement>(null);
     const [localContent, setLocalContent] = useState(content);
 
     const [showRefMenu, setShowRefMenu] = useState(false);
     const [showSlashMenu, setShowSlashMenu] = useState(false);
     const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
 
+    /* Solo actualizar localContent si el valor de base de datos cambia externamente */
     useEffect(() => {
-        if (focusedBlockId === id && editableRef.current && type !== 'reference') {
-            editableRef.current.focus();
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.selectNodeContents(editableRef.current);
-            if (editableRef.current.childNodes.length > 0) {
-                range.collapse(false);
+        if (!focusedBlockId || focusedBlockId !== id) {
+            setLocalContent(content);
+        }
+    }, [content, id, focusedBlockId]);
+
+    useEffect(() => {
+        if (focusedBlockId === id && type !== 'reference') {
+            if (type === 'code') {
+                const textarea = codeContainerRef.current?.querySelector('textarea');
+                if (textarea) textarea.focus();
+            } else if (editableRef.current) {
+                editableRef.current.focus();
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(editableRef.current);
+                if (editableRef.current.childNodes.length > 0) {
+                    range.collapse(false);
+                }
+                sel?.removeAllRanges();
+                sel?.addRange(range);
             }
-            sel?.removeAllRanges();
-            sel?.addRange(range);
         }
     }, [focusedBlockId, id, type]);
 
-    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-        const text = e.currentTarget.textContent || '';
+    const handleInput = (e: React.SyntheticEvent<HTMLElement>) => {
+        // Extract text to preserve line breaks
+        const text = (e.currentTarget as HTMLElement).innerText || '';
         setLocalContent(text);
 
         if (text === '# ') {
@@ -49,6 +75,9 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
             changeType('h3');
         } else if (text === '- ') {
             changeType('list_item');
+        } else if (text === '``` ' || text === '```\n' || text === '```') {
+             // Prevent state race conditions
+             setTimeout(() => changeType('code'), 0);
         } else if (text === '/') {
             setShowSlashMenu(true);
             setShowRefMenu(false);
@@ -60,6 +89,23 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         } else {
             setShowSlashMenu(false);
             setShowRefMenu(false);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(text));
+            range.collapse(false);
+            
+            if (editableRef.current) {
+                setLocalContent(editableRef.current.innerText || '');
+            }
         }
     };
 
@@ -84,9 +130,14 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         setActiveNotebook(newId);
     };
 
-    const handleBlur = () => {
+    const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
         if (!showRefMenu && !showSlashMenu) {
             updateBlockContent(id, localContent);
+            
+            // Clear focus if blur is outside
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setFocusedBlock(null);
+            }
         }
     };
 
@@ -97,11 +148,12 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         { label: 'Título 2', type: 'h2' as BlockType, icon: Heading2 },
         { label: 'Título 3', type: 'h3' as BlockType, icon: Heading3 },
         { label: 'Lista', type: 'list_item' as BlockType, icon: ListIcon },
+        { label: 'Código', type: 'code' as BlockType, icon: Code },
         { label: 'Enlace a cuaderno', action: 'ref', icon: Link },
         { label: 'Sub-cuaderno', action: 'sub', icon: Plus },
     ];
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         if (showSlashMenu) {
             if (e.key === 'Escape') {
                 setShowSlashMenu(false);
@@ -152,9 +204,13 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         }
 
         if (e.key === 'Enter') {
-            e.preventDefault();
-            updateBlockContent(id, localContent);
-            createBlockAfter(id);
+            if (type === 'code') {
+                return;
+            } else {
+                e.preventDefault();
+                updateBlockContent(id, localContent);
+                createBlockAfter(id);
+            }
         } else if (e.key === 'Backspace' && localContent === '') {
             e.preventDefault();
             if (type !== 'text') {
@@ -163,9 +219,9 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
                 deleteBlock(id);
             }
         } else if (e.key === 'ArrowUp') {
-            focusPrevious(id);
+            if (type !== 'code') focusPrevious(id);
         } else if (e.key === 'ArrowDown') {
-            focusNext(id);
+            if (type !== 'code') focusNext(id);
         }
     };
 
@@ -213,6 +269,7 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         case 'h2': elementClass += ' block-h2'; break;
         case 'h3': elementClass += ' block-h3'; break;
         case 'list_item': elementClass += ' block-list-item'; break;
+        case 'code': elementClass += ' block-code'; break;
         default: elementClass += ' block-text'; break;
     }
 
@@ -221,19 +278,45 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
             {type === 'list_item' && <span className="block-bullet">•</span>}
 
             <div className="block-input-wrapper" style={{ width: '100%', position: 'relative' }}>
-                <div
-                    ref={editableRef}
-                    className={elementClass}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onInput={handleInput}
-                    onBlur={handleBlur}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => setFocusedBlock(id)}
-                    data-placeholder={type === 'text' && blocks.length === 1 && index === 0 ? "Escribe algo, o presiona '/' para comandos..." : ""}
-                >
-                    {content}
-                </div>
+                {type === 'code' ? (
+                    <div ref={codeContainerRef}>
+                        <Editor
+                            value={localContent}
+                            onValueChange={code => setLocalContent(code)}
+                            highlight={code => {
+                                const lang = detectLanguage(code);
+                                return Prism.highlight(code, Prism.languages[lang] || Prism.languages.javascript, lang);
+                            }}
+                            padding={14}
+                            className={`block-code language-${detectLanguage(localContent)}`}
+                            style={{
+                                fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
+                                borderRadius: '6px',
+                                minHeight: 'auto',
+                                marginTop: '0.5em',
+                                fontSize: '0.9em'
+                            }}
+                            onBlur={handleBlur}
+                            onKeyDown={handleKeyDown}
+                            onFocus={() => setFocusedBlock(id)}
+                        />
+                    </div>
+                ) : (
+                    <div
+                        ref={editableRef}
+                        className={elementClass}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onInput={handleInput}
+                        onPaste={handlePaste}
+                        onBlur={handleBlur}
+                        onKeyDown={handleKeyDown}
+                        onFocus={() => setFocusedBlock(id)}
+                        data-placeholder={type === 'text' && blocks.length === 1 && index === 0 ? "Escribe algo, o presiona '/' para comandos..." : ""}
+                    >
+                        {content}
+                    </div>
+                )}
 
                 {showSlashMenu && (
                     <div className="reference-menu">

@@ -29,7 +29,7 @@ export const useBlockStore = create<BlockState>((set, get) => ({
             const notebook = await db.getNotebook(notebookId);
             if (!notebook) throw new Error('Notebook not found');
 
-            // Si el cuaderno no tiene bloques, inicializamos con uno vacío
+            // Initialize with an empty block if notebook has none
             let notebookBlocks: Block[] = [];
             if (notebook.blocks.length === 0) {
                 const initialBlockId = uuidv4();
@@ -127,7 +127,7 @@ export const useBlockStore = create<BlockState>((set, get) => ({
         const notebookId = blocks[currentIndex].notebookId;
         await db.deleteBlock(blockId);
 
-        // Si eliminamos, concatenamos el texto con el bloque anterior si era de texto (opcional simplificado)
+        // Update the notebook's block list
         const notebook = await db.getNotebook(notebookId);
         if (notebook) {
             notebook.blocks = notebook.blocks.filter(id => id !== blockId);

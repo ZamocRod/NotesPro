@@ -1,4 +1,4 @@
-export type BlockType = 'text' | 'h1' | 'h2' | 'h3' | 'list_item' | 'reference';
+export type BlockType = 'text' | 'h1' | 'h2' | 'h3' | 'list_item' | 'reference' | 'code';
 
 export interface BlockProperties {
   bold?: boolean;

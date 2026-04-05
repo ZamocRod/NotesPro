@@ -1,0 +1,26 @@
+/* src/styles/variables.css */
+:root {
+  --bg-primary: rgb(245, 245, 245);
+  --bg-web: rgb(205, 205, 205);
+  --bg-sidebar: rgba(255, 255, 255, 0);
+  --bg-hover: rgba(255, 255, 255, 0.5);
+  --bg-active: rgba(255, 255, 255, 0.6);
+  --text-main: #1a1a1a;
+  --text-muted: rgba(0, 0, 0, 0.75);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --accent-blue: #007aff;
+  --accent-red: #ff3b30;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  --action-btn-size: 18px;
+}
+
+.dark-theme {
+  --bg-primary: rgba(18, 18, 18, 1);
+  --bg-web: rgb(60, 60, 60);
+  --bg-sidebar: rgba(25, 25, 25, 0);
+  --bg-hover: rgba(255, 255, 255, 0.1);
+  --bg-active: rgba(255, 255, 255, 0.15);
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.75);
+  --border-color: rgba(255, 255, 255, 0.12);
+}

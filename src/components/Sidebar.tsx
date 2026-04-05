@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Book, Trash2, Edit2, Sun, Moon, Download, Upload } from 'lucide-react';
+import { Plus, Book, Trash2, Edit2, Sun, Moon, Settings } from 'lucide-react';
 import { useNotebookStore } from '../store/notebookStore';
 import { useThemeStore } from '../store/themeStore';
-import * as db from '../lib/db';
+import './Sidebar.css';
 
 export function Sidebar() {
     const { notebooks, activeNotebookId, loadNotebooks, setActiveNotebook, createNotebook, renameNotebook, deleteNotebook } = useNotebookStore();
@@ -19,72 +19,8 @@ export function Sidebar() {
         loadNotebooks();
     }, [loadNotebooks]);
 
-    const handleExport = async () => {
-        try {
-            const allNotebooks = await db.getNotebooks();
-            const allBlocks = await db.getAllBlocks();
-            const data = { notebooks: allNotebooks, blocks: allBlocks };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `notespro_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error exporting data:', error);
-            alert('Error al exportar los datos.');
-        }
-    };
 
-    const handleImport = () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json';
-        input.onchange = async (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (!file) return;
 
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-
-                if (!data.notebooks || !data.blocks) {
-                    throw new Error('Invalid format');
-                }
-
-                if (!confirm('¿Deseas importar este respaldo? Se añadirán o actualizarán los cuadernos y bloques.')) {
-                    return;
-                }
-
-                for (const nb of data.notebooks) {
-                    await db.updateNotebook(nb);
-                }
-                await db.putBlocks(data.blocks);
-                
-                await loadNotebooks();
-                alert('¡Datos importados con éxito!');
-            } catch (error) {
-                console.error('Error importing data:', error);
-                alert('Error al importar el archivo. Verifica que sea un JSON válido de NotesPro.');
-            }
-        };
-        input.click();
-    };
-
-    const handleClearAll = async () => {
-        if (!confirm('⚠️ ESTA ACCIÓN ES IRREVERSIBLE. ¿Estás seguro de que quieres eliminar TODOS los cuadernos y notas permanentemente?')) {
-            return;
-        }
-        try {
-            await db.clearAll();
-            await loadNotebooks();
-            setActiveNotebook(null);
-        } catch (error) {
-            console.error('Error clearing data:', error);
-            alert('Error al tratar de borrar los datos.');
-        }
-    };
 
     const handleCreate = async () => {
         if (!newTitle.trim()) {
@@ -128,17 +64,7 @@ export function Sidebar() {
         <div className="sidebar">
             <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>NotesPro</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="action-btn" onClick={handleClearAll} title="Eliminar Todos los Cuadernos" style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                        <Trash2 size={16} />
-                    </button>
-                    <button className="action-btn" onClick={handleImport} title="Importar Respaldo" style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                        <Upload size={16} />
-                    </button>
-                    <button className="action-btn" onClick={handleExport} title="Exportar Respaldo" style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                        <Download size={16} />
-                    </button>
-                </div>
+
             </div>
 
             <div className="sidebar-content">
@@ -320,6 +246,12 @@ export function Sidebar() {
                         </div>
                     )
                 })}
+            </div>
+
+            <div className='sidebar-footer'>
+                <button className='action-btn'>
+                    <Settings size={16} />
+                </button>
             </div>
         </div>
     );

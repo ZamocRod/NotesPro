@@ -1,7 +1,7 @@
 {
   "name": "notespro",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
@@ -14,12 +14,15 @@
     "electron:build": "vite build && electron-builder"
   },
   "dependencies": {
+    "@types/prismjs": "^1.26.6",
     "clsx": "^2.1.1",
     "idb": "^8.0.3",
     "lucide-react": "^0.575.0",
+    "prismjs": "^1.30.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
+    "react-simple-code-editor": "^0.14.1",
     "tailwind-merge": "^3.5.0",
     "uuid": "^13.0.0",
     "zustand": "^5.0.11"

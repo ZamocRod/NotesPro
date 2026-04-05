@@ -17,7 +17,7 @@ interface NotebookState {
     deleteNotebook: (id: string) => Promise<void>;
 }
 
-export const useNotebookStore = create<NotebookState>((set, get) => ({
+export const useNotebookStore = create<NotebookState>((set) => ({
     notebooks: [],
     activeNotebookId: null,
     isLoading: false,

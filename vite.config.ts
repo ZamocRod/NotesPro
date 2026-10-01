@@ -1,34 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
+
+const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
+const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
   base: './',
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      manifest: {
-        name: 'NotesPro',
-        short_name: 'NotesPro',
-        description: 'Aplicación de notas basada en bloques, rápida y local.',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        icons: [
-          {
-            src: '/notespro_icon.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml'
-          },
-          {
-            src: '/notespro_icon.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml'
-          }
-        ]
-      }
-    })
-  ]
+  clearScreen: false,
+  define: { __APP_VERSION__: JSON.stringify(packageJson.version) },
+  plugins: [react()],
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: host || '127.0.0.1',
+    watch: { ignored: ['**/src-tauri/**'] },
+  },
 });

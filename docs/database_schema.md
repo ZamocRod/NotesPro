@@ -3,7 +3,8 @@
 Utilizamos la librería ligera `idb` para proveer un wrapper asíncrono sobre la API nativa de IndexedDB en el navegador.
 
 ## Nombre de BD y Versión
-- **Nombre:** `notespro-db`
+- **Producción:** `NotesProDB`
+- **Desarrollo:** `NotesProDB-dev`
 - **Versión:** `1`
 
 ## Tabla (ObjectStore): `notebooks`
@@ -31,3 +32,7 @@ Almacena el contenido y tipo de fragmentos que componen el documento.
 
 ## Integridad
 La base de datos actual realiza eliminaciones en cascada asíncronamente. Al ejecutar `deleteNotebook`, todos los `blocks` cuyo `notebookId === target.id` son interceptados y borrados, manteniendo la estructura local libre de basuras en índices.
+
+## Entornos de Tauri
+
+`pnpm run tauri:dev` usa `com.notespro.app.dev`; el instalador generado por `pnpm run deploy` usa `com.notespro.app`. Vite selecciona el nombre de base mediante `import.meta.env.DEV`. Cada perfil conserva sus propios datos y ninguna operación de desarrollo abre la base de producción. Las notas de la aplicación anterior se transfieren con Exportar/Importar Respaldo JSON.

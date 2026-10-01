@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Notebook, Block } from '../types';
+import { DATABASE_NAME } from './environment';
 
 interface NotesProDB extends DBSchema {
     notebooks: {
@@ -14,7 +15,7 @@ interface NotesProDB extends DBSchema {
     };
 }
 
-const DB_NAME = 'NotesProDB';
+const DB_NAME = DATABASE_NAME;
 const DB_VERSION = 1;
 
 let dbPromise: Promise<IDBPDatabase<NotesProDB>> | null = null;

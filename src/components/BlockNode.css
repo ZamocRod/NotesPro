@@ -13,6 +13,38 @@
   align-items: flex-start;
   gap: 8px;
   position: relative;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease;
+}
+
+.block-row:hover {
+  background-color: var(--bg-block-hover);
+}
+
+.block-add-btn {
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.block-add-btn:hover {
+  background-color: var(--bg-active);
+  color: var(--text-main);
+}
+
+.block-row:hover .block-add-btn {
+  opacity: 1;
 }
 
 .block-bullet {

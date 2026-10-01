@@ -3,6 +3,8 @@ import type { Block, BlockType } from '../types';
 import * as db from '../lib/db';
 import { v4 as uuidv4 } from 'uuid';
 
+let activeLoadId = 0;
+
 interface BlockState {
     blocks: Block[];
     isLoading: boolean;
@@ -24,6 +26,7 @@ export const useBlockStore = create<BlockState>((set, get) => ({
     focusedBlockId: null,
 
     loadBlocks: async (notebookId) => {
+        const loadId = ++activeLoadId;
         set({ isLoading: true });
         try {
             const notebook = await db.getNotebook(notebookId);
@@ -51,9 +54,13 @@ export const useBlockStore = create<BlockState>((set, get) => ({
                 notebookBlocks = resolvedBlocks.filter((b): b is Block => b !== undefined);
             }
 
-            set({ blocks: notebookBlocks, isLoading: false });
+            if (loadId === activeLoadId) {
+                set({ blocks: notebookBlocks, isLoading: false, focusedBlockId: null });
+            }
         } catch (e) {
-            set({ isLoading: false });
+            if (loadId === activeLoadId) {
+                set({ isLoading: false });
+            }
             console.error(e);
         }
     },

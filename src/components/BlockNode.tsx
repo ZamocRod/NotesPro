@@ -236,6 +236,13 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
         const referencedNotebook = notebooks.find(nb => nb.id === content);
         return (
             <div className="block-row">
+                <div 
+                    className="block-add-btn" 
+                    onClick={() => createBlockAfter(id)}
+                    title="Añadir bloque abajo"
+                >
+                    <Plus size={16} />
+                </div>
                 <div
                     className="block-reference"
                     onClick={() => {
@@ -275,6 +282,14 @@ export function BlockNode({ id, type, content, index, notebookId }: BlockProps) 
 
     return (
         <div className="block-row">
+            <div 
+                className="block-add-btn" 
+                onClick={() => createBlockAfter(id)}
+                title="Añadir bloque abajo"
+            >
+                <Plus size={16} />
+            </div>
+            
             {type === 'list_item' && <span className="block-bullet">•</span>}
 
             <div className="block-input-wrapper" style={{ width: '100%', position: 'relative' }}>

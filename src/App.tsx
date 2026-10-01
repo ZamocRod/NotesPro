@@ -3,8 +3,13 @@ import { useNotebookStore } from "./store/notebookStore";
 import { BookOpen } from "lucide-react";
 import { Editor } from "./components/Editor";
 import { TitleBar } from "./components/TitleBar";
+import { ConfirmModal } from "./components/ConfirmModal";
 import { useThemeStore } from "./store/themeStore";
+
+import { isTauri } from "@tauri-apps/api/core";
+
 import { useEffect } from "react";
+
 
 function App() {
   const { activeNotebookId, notebooks } = useNotebookStore();
@@ -14,17 +19,12 @@ function App() {
     initTheme();
   }, [initTheme]);
 
-  const activeNotebook = notebooks.find((nb) => nb.id === activeNotebookId);
-  // Agregas esto en tu App.tsx o algún Effect global
-  useEffect(() => {
-    const isElectron = navigator.userAgent.toLowerCase().includes("electron");
 
-    if (!isElectron) {
-      // Si NO es Electron (es decir, estamos en la Web), añadimos una clase al body
-      document.body.classList.add("is-web");
-    } else {
-      document.body.classList.add("is-electron");
-    }
+  const activeNotebook = notebooks.find((nb) => nb.id === activeNotebookId);
+  useEffect(() => {
+    const className = isTauri() ? 'is-tauri' : 'is-web';
+    document.body.classList.add(className);
+    return () => document.body.classList.remove(className);
   }, []);
 
   return (
@@ -52,8 +52,9 @@ function App() {
           </div>
         </main>
 
-        <div className="app-version">v1.0.0</div>
+        <div className="app-version">v{__APP_VERSION__}</div>
       </div>
+      <ConfirmModal />
     </div>
   );
 }

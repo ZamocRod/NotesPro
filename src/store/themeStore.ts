@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { isTauri } from '@tauri-apps/api/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { THEME_STORAGE_KEY } from '../lib/environment';
 
 interface ThemeState {
     isDark: boolean;
@@ -7,16 +10,10 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set, get) => {
-    // Helper to sync theme with Electron's native material
-    const syncWithElectron = (isDark: boolean) => {
-        try {
-            // Using window.require since nodeIntegration: true and contextIsolation: false
-            const electron = (window as any).require?.('electron');
-            if (electron?.ipcRenderer) {
-                electron.ipcRenderer.send('set-native-theme', isDark ? 'dark' : 'light');
-            }
-        } catch (e) {
-            // console.warn('Not in Electron environment or IPC failed');
+    const syncNativeTheme = (isDark: boolean) => {
+        if (isTauri()) {
+            void getCurrentWindow().setTheme(isDark ? 'dark' : 'light')
+                .catch(error => console.error('Error syncing native theme:', error));
         }
     };
 
@@ -27,18 +24,18 @@ export const useThemeStore = create<ThemeState>((set, get) => {
 
             // update localStorage
             if (isDark) {
-                localStorage.setItem('notespro-theme', 'dark');
+                localStorage.setItem(THEME_STORAGE_KEY, 'dark');
                 document.body.classList.add('dark-theme');
             } else {
-                localStorage.setItem('notespro-theme', 'light');
+                localStorage.setItem(THEME_STORAGE_KEY, 'light');
                 document.body.classList.remove('dark-theme');
             }
 
-            syncWithElectron(isDark);
+            syncNativeTheme(isDark);
             set({ isDark });
         },
         initTheme: () => {
-            const savedTheme = localStorage.getItem('notespro-theme');
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
             // Default to system preference if no saved theme
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -50,7 +47,7 @@ export const useThemeStore = create<ThemeState>((set, get) => {
                 document.body.classList.remove('dark-theme');
             }
 
-            syncWithElectron(isDark);
+            syncNativeTheme(isDark);
             set({ isDark });
         }
     };

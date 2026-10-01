@@ -17,7 +17,7 @@ interface NotebookState {
     deleteNotebook: (id: string) => Promise<void>;
 }
 
-export const useNotebookStore = create<NotebookState>((set) => ({
+export const useNotebookStore = create<NotebookState>((set, get) => ({
     notebooks: [],
     activeNotebookId: null,
     isLoading: false,
@@ -29,7 +29,17 @@ export const useNotebookStore = create<NotebookState>((set) => ({
             const notebooks = await db.getNotebooks();
             // Sort by updatedAt descending
             notebooks.sort((a, b) => b.updatedAt - a.updatedAt);
-            set({ notebooks, isLoading: false });
+            const { activeNotebookId } = get();
+            const hasActiveNotebook = notebooks.some((nb) => nb.id === activeNotebookId);
+            const nextActiveNotebookId = hasActiveNotebook
+                ? activeNotebookId
+                : notebooks[0]?.id ?? null;
+
+            set({
+                notebooks,
+                activeNotebookId: nextActiveNotebookId,
+                isLoading: false,
+            });
         } catch (error) {
             set({ error: 'Failed to load notebooks', isLoading: false });
         }
@@ -88,7 +98,9 @@ export const useNotebookStore = create<NotebookState>((set) => ({
             await db.deleteNotebook(id);
             set((state) => ({
                 notebooks: state.notebooks.filter((nb) => nb.id !== id),
-                activeNotebookId: state.activeNotebookId === id ? null : state.activeNotebookId,
+                activeNotebookId: state.activeNotebookId === id
+                    ? state.notebooks.find((nb) => nb.id !== id)?.id ?? null
+                    : state.activeNotebookId,
             }));
         } catch (error) {
             set({ error: 'Failed to delete notebook' });

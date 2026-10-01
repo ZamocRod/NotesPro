@@ -16,3 +16,7 @@ El frontend sigue un patrón inspirado en **Flux/Zustand** combinado con un **Re
 
 ## 3. Tematización
 El estado global provee un `themeStore` que detecta preferencias de sistema. La aplicación lee de `localStorage` (`notespro-theme`) y aplica la clase `.dark-theme` al `document.body` activando variables CSS ubicadas en `index.css`.
+
+## Runtime nativo
+
+Tauri 2 aloja la interfaz en el WebView del sistema. `src-tauri` configura la ventana y los permisos para controles de ventana, tema y archivos seleccionados por el usuario en diálogos de respaldo. Desarrollo y producción usan perfiles y nombres de IndexedDB distintos, definidos en `src-tauri/tauri.dev.conf.json` y `src/lib/environment.ts`.

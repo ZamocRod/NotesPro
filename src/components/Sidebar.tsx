@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Book, Trash2, Edit2, Sun, Moon, Settings } from 'lucide-react';
 import { useNotebookStore } from '../store/notebookStore';
 import { useThemeStore } from '../store/themeStore';
+import { useModalStore } from '../store/modalStore';
 import './Sidebar.css';
+
 
 export function Sidebar() {
     const { notebooks, activeNotebookId, loadNotebooks, setActiveNotebook, createNotebook, renameNotebook, deleteNotebook } = useNotebookStore();
@@ -53,17 +55,26 @@ export function Sidebar() {
 
     const handleDelete = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (confirm('¿Estás seguro de eliminar este cuaderno?')) {
+        
+        const confirmed = await useModalStore.getState().showConfirm({
+            title: 'Eliminar Cuaderno',
+            message: '¿Estás seguro de eliminar este cuaderno y todas sus notas? Esta acción no se puede deshacer.',
+            confirmText: 'Eliminar',
+            type: 'danger'
+        });
+
+        if (confirmed) {
             await deleteNotebook(id);
         }
     };
+
 
     const rootNotebooks = notebooks.filter(nb => !nb.parentId);
 
     return (
         <div className="sidebar">
-            <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>NotesPro</span>
+            <div data-tauri-drag-region className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span data-tauri-drag-region>NotesPro</span>
 
             </div>
 

@@ -23,9 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 
-# Electron builder output
+# Build output
 release
 release/
 
 # Environment files
 .env
+
+# Tauri generated files
+src-tauri/target/
+src-tauri/gen/
+.pnpm-store/
